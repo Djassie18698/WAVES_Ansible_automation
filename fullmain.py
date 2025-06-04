@@ -2,6 +2,10 @@ import os
 import requests
 import subprocess
 import getpass
+try:
+    from questionary import text, password
+except ImportError:
+    text = password = None
 import time
 import json
 import random
@@ -32,12 +36,23 @@ surf_api_key = ""
 # === Prompt user
 
 def ask_credentials():
+    """Prompt the user for credentials using a terminal GUI."""
     global ssh_user, github_user, github_token, github_repo, surf_api_key
-    ssh_user = input("👤 SSH username for VM: ").strip()
-    github_user = input("🐙 GitHub username: ").strip()
-    github_repo = input("📦 GitHub repo (user/repo): ").strip()
-    github_token = getpass.getpass("🔐 GitHub token: ").strip()
-    surf_api_key = getpass.getpass("🔐 SURF API key: ").strip()
+
+    if text is None or password is None:
+        # questionary not installed, fallback to standard input
+        ssh_user = input("👤 SSH username for VM: ").strip()
+        github_user = input("🐙 GitHub username: ").strip()
+        github_repo = input("📦 GitHub repo (user/repo): ").strip()
+        github_token = getpass.getpass("🔐 GitHub token: ").strip()
+        surf_api_key = getpass.getpass("🔐 SURF API key: ").strip()
+        return
+
+    ssh_user = text("👤 SSH username for VM:").ask().strip()
+    github_user = text("🐙 GitHub username:").ask().strip()
+    github_repo = text("📦 GitHub repo (user/repo):").ask().strip()
+    github_token = password("🔐 GitHub token:").ask().strip()
+    surf_api_key = password("🔐 SURF API key:").ask().strip()
 
 # === SSH key handling
 
