@@ -26,12 +26,25 @@ De workflow verloopt als volgt:
 
 | Bestand | Beschrijving |
 |--------|--------------|
-| `main.py` | Centrale script dat alles aanstuurt: tokens, VM aanmaak, Ansible-oproep, etc. |
-| `PythonGithubChecker.py` | Checkt of er een nieuwe commit is in de opgegeven GitHub-repo. |
+| `fullmain.py` | Hoofdscript dat alles aanstuurt: tokens, VM-aanmaak, Ansible-oproep, etc. |
+| `fullmainlogging.py` | Variant van het hoofdscript met uitgebreide logging. |
 | `IDFinder_basic.py` | Haalt het IP-adres van de nieuwe workspace op en past de Ansible-inventory aan. |
 | `setup_vm.yml` | Het Ansible playbook dat de workspace configureert. |
 | `inventory.ini` | Dynamisch gegenereerde Ansible-inventory met de juiste SSH-instellingen. |
+| `gitdownloader.yml` | Ansible taak voor het clonen en terugpushen van een GitHub-repo. |
 | `data/` | Map voor tijdelijke of permanente data (zoals logs of outputbestanden). |
+| `requirements.txt` | Bevat de Python-afhankelijkheden voor dit project. |
+
+## 🔨 Installatie
+
+1. Installeer de afhankelijkheden:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Start het script:
+   ```bash
+   python fullmain.py
+   ```
 
 ## 🔐 Authenticatie
 
@@ -39,7 +52,7 @@ Voor dit project zijn twee tokens nodig:
 - **SURF API Key**: Voor het aanmaken en beheren van werkplekken
 - **GitHub Token**: Voor toegang tot de repository (lezen/schrijven)
 
-Deze worden gevraagd bij het starten van `main.py` en **worden niet opgeslagen** in het script of in plaintext-bestanden.
+Deze worden gevraagd bij het starten van `fullmain.py` en **worden niet opgeslagen** in het script of in plaintext-bestanden.
 
 ## 💡 Mogelijke uitbreidingen
 
