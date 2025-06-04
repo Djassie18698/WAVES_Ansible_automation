@@ -21,6 +21,7 @@ DATA_DIR.mkdir(exist_ok=True)
 LAST_COMMIT_FILE = DATA_DIR / "last_commit.txt"
 WORKSPACE_TEMPLATE = DATA_DIR / "workspace_config_surftest_no_storage.json"
 NAME_LOG_FILE = DATA_DIR / "last_workspace_names.txt"
+LOOKUP_JSON = DATA_DIR / "workspace_ip_lookup.json"
 
 # === Hardcoded credentials ===
 ssh_user = "dnellessen"
@@ -122,6 +123,28 @@ def get_last_ip():
     log("❌ No IP found in inventory.")
     return None
 
+# === Delete workspace ===
+def delete_workspace_by_id():
+    if not LOOKUP_JSON.exists():
+        log("❌ Cannot delete workspace: workspace_ip_lookup.json not found.")
+        return
+    with open(LOOKUP_JSON) as f:
+        data = json.load(f)
+        workspace_id = data.get("workspace_id")
+    if not workspace_id:
+        log("❌ Cannot delete workspace: ID missing in JSON.")
+        return
+    url = f"https://gw.live.surfresearchcloud.nl/v1/workspace/workspaces/{workspace_id}/"
+    headers = {
+        "accept": "*/*",
+        "authorization": surf_api_key
+    }
+    response = requests.delete(url, headers=headers)
+    if response.status_code in [200, 204]:
+        log(f"🗑️ Workspace {workspace_id} deleted successfully.")
+    else:
+        log(f"❌ Failed to delete workspace {workspace_id}. Status: {response.status_code}")
+
 # === Run Ansible ===
 def run_playbook(ip):
     log(f"🚀 Running playbook on {ip}...")
@@ -139,8 +162,11 @@ def run_playbook(ip):
     result = subprocess.run(cmd)
     if result.returncode == 0:
         log("✅ Ansible playbook completed successfully.")
+        log("⏳ Waiting 60 seconds before deleting workspace...")
+        time.sleep(60)
+        delete_workspace_by_id()
     else:
-        log("❌ Ansible playbook failed.")
+        log("❌ Ansible playbook failed. Workspace will NOT be deleted.")
     return result.returncode == 0
 
 # === Main ===
@@ -167,3 +193,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
